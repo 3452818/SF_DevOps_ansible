@@ -1,0 +1,5 @@
+---
+# defaults file for http
+
+#php_host: 127.0.0.1
+php_host: 89.169.191.196

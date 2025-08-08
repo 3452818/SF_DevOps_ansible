@@ -1,0 +1,9 @@
+- name: Start MySQL server
+  hosts: localhost
+  become: yes
+  tasks:
+    - name:  MySQL is running
+      service:
+        name: mysqld
+        state: started
+        enabled: yes

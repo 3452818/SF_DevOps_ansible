@@ -1,0 +1,44 @@
+---
+# tasks file for nginx_php
+- name: Install nginx and php-fpm
+  package:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - nginx
+    - php-fpm
+    - php
+  become: yes
+
+- name: Config nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/default.d/nginx_php.conf
+  notify: Reload nginx
+  become: yes
+
+##for p3
+- name: Create index.php
+  copy:
+    content: "<?php phpinfo(); ?>"
+    dest: /var/www/html/index.php
+    mode: 0644
+  become: yes
+
+##for p4
+- name: Create dir  /opt/nginx/ansible
+  file:
+    path: /opt/nginx/ansible
+    state: directory
+    mode: 0755
+  become: yes
+
+
+- name: Create index.php
+  copy:
+    content: "<?php phpinfo(); ?>"
+    dest: /opt/nginx/ansible/index.php
+    mode: 0644
+  become: yes
+

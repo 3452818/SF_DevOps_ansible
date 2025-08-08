@@ -1,0 +1,41 @@
+- name: Install and start Docker based on OS type
+  hosts: localhost
+  become: yes
+  vars:
+    docker_package: ""
+  tasks:
+    - name: Determine OS family
+      set_fact:
+        os_family: "{{ ansible_os_family }}"
+
+    - name: Set Docker package for Debian-based systems
+      set_fact:
+        docker_package: "docker.io"
+      when: os_family == "Debian"
+
+    - name: Set Docker package for RedHat-based systems
+      set_fact:
+        docker_package: "docker-ce"
+      when: os_family == "RedHat"
+
+    - name: Update package index for Debian-based systems
+      apt:
+        update_cache: yes
+      when: os_family == "Debian"
+
+    - name: Update package index for RedHat-based systems
+      yum:
+        name: epel-release
+        state: present
+      when: os_family == "RedHat"
+
+    - name: Install Docker
+      package:
+        name: "{{ docker_package }}"
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes

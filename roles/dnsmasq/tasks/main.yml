@@ -1,0 +1,21 @@
+---
+# tasks file for dnsmasq
+- name: Install dnsmasq
+  package:
+    name: dnsmasq
+    state: present
+  become: yes
+
+- name: Config dnsmasq
+  template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+  notify: Restart dnsmasq
+  become: yes
+
+- name: Start dnsmasq
+  service:
+    name: dnsmasq
+    state: started
+    enabled: yes
+  become: yes

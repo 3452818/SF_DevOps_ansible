@@ -1,0 +1,11 @@
+---
+# defaults file for users
+
+#username:
+#- testuser
+# - devuser2
+
+list_of_users:
+  - name: user1
+  - name: user2
+

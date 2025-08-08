@@ -1,0 +1,33 @@
+---
+# tasks file for http
+
+- name: Install nginx
+  package:
+    name: nginx
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Start nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+#- name: Check port 80
+#  wait_for:
+#    port: 80
+#    timeout: 10
+
+- name: Config nginx
+  template:
+    src: nginx_php.conf_v1.j2
+#    src: nginx_php.conf_v2.j2
+    dest: /etc/nginx/default.d/nginx_php.conf
+    owner: root
+    group: root
+    mode: '0644'
+#    validate: "/usr/sbin/nginx -t -c %s"
+  notify: Reload nginx
+  become: yes
+

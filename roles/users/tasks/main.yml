@@ -1,0 +1,51 @@
+---
+# tasks file for users
+
+- name: Create user
+  user:
+    name: "{{ item.name }}"
+    state: present
+    create_home: yes
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+  register: user_creation_result  # Регистрируем результат
+  loop: "{{ list_of_users }}"
+  loop_control:
+    label: "{{ item.name }}"       # Упрощает чтение вывода
+
+
+- name: Ensure .ssh directory has correct permissions
+  file:
+    path: "/home/{{ item.name }}/.ssh"
+    mode: "0700"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    state: directory
+  loop: "{{ list_of_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Ensure authorized_keys has correct permissions
+  file:
+    path: "/home/{{ item.name }}/.ssh/authorized_keys"
+    mode: "0600"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    state: touch
+  loop: "{{ list_of_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+#- name: Debug user_creation_result
+#  debug:
+#    msg: "{{ user_creation_result.results }}"
+
+
+- name: Add generated SSH public key to authorized keys
+  authorized_key:
+   user: "{{ item.item.name }}"
+   key: "{{ item.ssh_public_key }}"
+  loop: "{{ user_creation_result.results }}"
+  loop_control:
+   label: "{{ item.item.name }}"

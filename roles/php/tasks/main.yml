@@ -1,0 +1,39 @@
+---
+# tasks file for php
+
+- name: Install php
+  package:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop:
+    - php-fpm
+    - php
+  become: yes
+
+- name: PHP-FPM on port 9000
+  lineinfile:
+    path: /etc/php-fpm.d/www.conf
+    line: "listen = 9000"
+    regexp: '^listen ='
+    state: present
+- name: PHP-FPM all listen
+  lineinfile:
+    path: /etc/php-fpm.d/www.conf
+    line: ";listen.allowed_clients = 127.0.0.1"
+    regexp: '^listen.allowed_clients = 127.0.0.1'
+    state: present
+
+
+- name: Create index.php
+  copy:
+    content: "<?php phpinfo(); ?>"
+    dest: /var/www/html/index.php
+    mode: 0644
+  become: yes
+
+- name: Restart PHP-FPM
+  service:
+    name: php-fpm
+    state: restarted
+    enabled: yes

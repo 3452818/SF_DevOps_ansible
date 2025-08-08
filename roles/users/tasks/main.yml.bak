@@ -1,0 +1,52 @@
+---
+# tasks file for users
+- name: Сreate users
+  user:
+    name: "{{ username }}"
+    shell: /bin/bash
+    create_home: yes
+    state: present
+  loop:
+   - user1
+
+- name: Создать директорию .ssh
+  file:
+    path: "/home/{{ username }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ username }}"
+    group: "{{ username }}"
+
+- name: Проверить наличие публичного ключа
+  stat:
+    path: "/home/{{ username }}/.ssh/id_rsa.pub"
+  register: public_key_stat
+  become_user: "{{ username }}"
+
+- name: Сгенерировать SSH-ключ, если он не существует
+  command: "ssh-keygen -t rsa -f /home/{{ username }}/.ssh/id_rsa "
+#  private_key_password: ""
+  become_user: "{{ username }}"
+  become: yes
+  when: not public_key_stat.stat.exists
+  register: ssh_key_result
+  changed_when: true
+
+- name: Прочитать сгенерированный публичный ключ
+  slurp:
+    src: "/home/{{ username }}/.ssh/id_rsa.pub"
+  become_user: "{{ username }}"
+  register: public_key_content
+  when: ssh_key_result is defined and ssh_key_result.changed
+
+- name: Сохранить публичный ключ в переменную
+  set_fact:
+    "ssh_public_key_{{ username }}": "{{ public_key_content.content | b64decode }}"
+  when: public_key_content is defined
+
+- name: Добавить SSH-ключ
+  authorized_key:
+    user: "{{ username }}"
+    key: "{{ lookup('var', 'ssh_public_key_' + username) }}"
+    state: present
+

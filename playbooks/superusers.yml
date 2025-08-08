@@ -1,0 +1,25 @@
+---
+- hosts: test
+  tasks:
+    - name: Create  superusers
+      group:
+        name: superusers
+        state: present
+      become: yes
+
+    - name: Add users to superusers group
+      user:
+        name: "{{ item }}"
+        groups: superusers
+        append: yes
+      loop:
+        - user2
+        - user3
+      become: yes
+
+    - name: Config sudoers
+      lineinfile:
+        path: /etc/sudoers
+        line: "superusers ALL=(ALL) NOPASSWD: ALL"
+        validate: 'visudo -cf %s'
+      become: yes

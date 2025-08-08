@@ -1,0 +1,13 @@
+---
+# tasks file for vsftpd
+- name: install package
+  yum:
+        name: vsftpd
+        state: installed
+
+- name: start service
+  service:
+        name: vsftpd
+        state: started
+        enabled: yes
+

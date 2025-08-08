@@ -1,0 +1,28 @@
+---
+- hosts: test
+  tasks:
+    - name: Install postfix
+      package:
+        name: postfix
+        state: present
+      tags: init_postfix
+
+    - name: Start and enable postfix service
+      service:
+        name: postfix
+        state: started
+        enabled: yes
+      tags: init_postfix
+
+    - name: Stop and disable postfix service
+      systemd:
+        name: postfix
+        state: stopped
+        enabled: no
+      tags: drop_postfix
+
+    - name: Remove postfix
+      package:
+        name: postfix
+        state: absent
+      tags: drop_postfix
